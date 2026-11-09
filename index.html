@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1f4a28">
+<title>Üzük.Baku — Aksesuarlar</title>
+<meta name="description" content="Üzük.Baku: üzük və aksesuarlar. Sifariş Instagram DM-də.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="store.css">
+</head>
+<body>
+<div class="announce">Sifariş Instagram DM-də qəbul olunur</div>
+<div class="wrap">
+  <header class="nav">
+    <a class="logo" href="#">Üzük<em>.</em>Baku</a>
+    <nav>
+      <a href="#shop">Məhsullar</a>
+      <a href="#how">Necə sifariş edim?</a>
+      <a class="btn line sm" id="igTop" target="_blank" rel="noopener">Instagram</a>
+    </nav>
+  </header>
+  <section class="hero">
+    <div>
+      <small>Üzük.Baku</small>
+      <h1>Barmağınıza yaraşan detallar</h1>
+      <p>Diqqətlə seçilmiş üzük və aksesuarlar. Bəyəndiyinizi tapın, Instagram DM-də sifariş edin.</p>
+      <div class="cta">
+        <a class="btn green" href="#shop">Məhsullara bax</a>
+        <a class="btn line" id="igHero" target="_blank" rel="noopener">Instagramda yaz</a>
+      </div>
+    </div>
+    <div class="rings" id="rings" aria-hidden="true"><div class="ring ph"></div><div class="ring ph"></div><div class="ring ph"></div></div>
+  </section>
+</div>
+
+<main>
+  <section class="shop" id="shop">
+    <div class="wrap">
+      <div class="shop-head">
+        <h2>Məhsullar</h2>
+        <input class="search" id="q" type="search" placeholder="Məhsul axtar" aria-label="Məhsul axtar">
+      </div>
+      <div class="chips" id="chips" hidden></div>
+      <div class="grid" id="grid">
+        <div class="sk"><div class="img"></div><div class="l"></div></div>
+        <div class="sk"><div class="img"></div><div class="l"></div></div>
+        <div class="sk"><div class="img"></div><div class="l"></div></div>
+        <div class="sk"><div class="img"></div><div class="l"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="how" id="how">
+    <div class="wrap">
+      <h2>Necə sifariş edim?</h2>
+      <div class="steps">
+        <div class="step"><b>1</b><h3>Məhsulu seçin</h3><p>Bəyəndiyiniz aksesuarı tapın və stokda olduğunu yoxlayın.</p></div>
+        <div class="step"><b>2</b><h3>Sifariş et düyməsinə basın</h3><p>Instagram-da mesaj pəncərəsi açılır, məhsulun adını yazın.</p></div>
+        <div class="step"><b>3</b><h3>Detalları razılaşdırın</h3><p>Ünvanı və ödəniş qaydasını mesajda bizimlə razılaşdırın.</p></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot"><span class="logo">Üzük.Baku</span><a id="igFoot" target="_blank" rel="noopener"></a></div>
+    <p class="copy">© <span id="yr"></span> Üzük.Baku</p>
+  </div>
+</footer>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { firebaseConfig, INSTAGRAM, CURRENCY } from "./firebase-config.js";
+
+const db = getFirestore(initializeApp(firebaseConfig));
+const $ = id => document.getElementById(id);
+const dm = `https://ig.me/m/${INSTAGRAM}`, profile = `https://instagram.com/${INSTAGRAM}`;
+$("igTop").href = profile; $("igHero").href = dm; $("igFoot").href = profile;
+$("igFoot").textContent = "@" + INSTAGRAM; $("yr").textContent = new Date().getFullYear();
+
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const thumb = (u, w) => u.replace("/upload/", `/upload/f_auto,q_auto,w_${w}/`);
+
+const KEY = "uzuk_catalog_v1", TTL = 3 * 60 * 1000;
+const readCache = () => { try { return JSON.parse(localStorage.getItem(KEY)); } catch { return null; } };
+
+let products = [], active = "Hamısı", term = "";
+
+function stockTag(n){
+  if (n <= 0) return '<span class="tag out">Bitib</span>';
+  if (n <= 3) return `<span class="tag low">Son ${n} ədəd</span>`;
+  return "";
+}
+function render(list){
+  if (!list.length){ $("grid").innerHTML = '<div class="empty">Bu axtarışa uyğun məhsul tapılmadı.</div>'; return; }
+  $("grid").innerHTML = list.map(p => `
+    <article class="card${p.stock <= 0 ? " sold" : ""}">
+      <div class="ph"><img src="${thumb(p.image, 520)}" width="520" height="520" alt="${esc(p.name)}" loading="lazy" decoding="async">${stockTag(p.stock)}</div>
+      <div class="info">
+        ${p.category ? `<div class="cat">${esc(p.category)}</div>` : ""}
+        <h3>${esc(p.name)}</h3>
+        ${p.desc ? `<p class="desc">${esc(p.desc)}</p>` : ""}
+        <div class="row">
+          <span class="price">${Number(p.price).toFixed(2)} ${CURRENCY}</span>
+          ${p.stock > 0 ? `<a class="btn green sm" href="${dm}" target="_blank" rel="noopener">Sifariş et</a>`
+                        : `<span class="btn off sm">Bitib</span>`}
+        </div>
+      </div>
+    </article>`).join("");
+}
+function chips(){
+  const cats = [...new Set(products.map(p => p.category).filter(Boolean))];
+  $("chips").hidden = !cats.length;
+  $("chips").innerHTML = ["Hamısı", ...cats].map(c => `<button class="chip${c === active ? " on" : ""}" data-c="${esc(c)}">${esc(c)}</button>`).join("");
+}
+function apply(){
+  const t = term.toLowerCase();
+  render(products.filter(p => (active === "Hamısı" || p.category === active) && p.name.toLowerCase().includes(t)));
+}
+function hero(){
+  const pics = products.slice(0, 3);
+  if (!pics.length) return;
+  $("rings").innerHTML = [0, 1, 2].map(i => pics[i]
+    ? `<div class="ring"><img src="${thumb(pics[i].image, 500)}" alt=""></div>` : '<div class="ring ph"></div>').join("");
+}
+
+const cache = readCache();
+let items0 = null;
+if (cache && cache.items?.length && Date.now() - cache.t < TTL) items0 = cache.items;
+else {
+  try {
+    const s = await getDoc(doc(db, "shop", "catalog"));
+    items0 = s.exists() ? (s.data().items || []) : [];
+    if (items0.length) { try { localStorage.setItem(KEY, JSON.stringify({ t: Date.now(), items: items0 })); } catch {} }
+  } catch (e) {
+    console.error(e);
+    if (cache) items0 = cache.items;
+  }
+}
+if (items0){
+  products = items0.slice().sort((a, b) => b.createdAt - a.createdAt);
+  hero(); chips(); products.length ? apply() : ($("grid").innerHTML = '<div class="empty">Tezliklə yeni məhsullar əlavə olunacaq.</div>');
+} else {
+  $("grid").innerHTML = '<div class="empty">Məhsullar yüklənmədi. Bir az sonra yenidən yoxlayın.</div>';
+}
+
+$("q").addEventListener("input", e => { term = e.target.value.trim(); apply(); });
+$("chips").addEventListener("click", e => {
+  const b = e.target.closest(".chip"); if (!b) return;
+  active = b.dataset.c; chips(); apply();
+});
+</script>
+</body>
+</html>
