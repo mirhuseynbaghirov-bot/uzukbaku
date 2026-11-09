@@ -2,18 +2,18 @@
 
 // 1) Firebase Console → Project settings → Your apps → Web app → firebaseConfig
 export const firebaseConfig = {
-  apiKey: "BURAYA_YENI_API_KEY",
-  authDomain: "YENI-LAYIHE-ID.firebaseapp.com",
-  projectId: "YENI-LAYIHE-ID",
-  appId: "BURAYA_YENI_APP_ID"
+  apiKey: "AIzaSyDeVXkiLHWiRWiBsH36h5NQWtU-fZTRR_Q",
+  authDomain: "uzukbaku-df61c.firebaseapp.com",
+  projectId: "uzukbaku-df61c",
+  appId: "1:101058598040:web:befa4262bcc32d659deced"
 };
 
 // 2) Firebase Authentication-da yaratdığınız admin istifadəçinin e-poçtu
-export const ADMIN_EMAIL = "musteri@gmail.com";
+export const ADMIN_EMAIL = "uzukbaku@gmail.com";
 
 // 3) Cloudinary: Dashboard-dakı "Cloud name" + unsigned upload preset adı
-export const CLOUD_NAME = "BURAYA_CLOUD_NAME";
-export const UPLOAD_PRESET = "BURAYA_PRESET_ADI";
+export const CLOUD_NAME = "qnbtrgxf";
+export const UPLOAD_PRESET = "idcjk0pv";
 
 // 4) Instagram istifadəçi adı (@ olmadan)
 export const INSTAGRAM = "uzuk.baku";
